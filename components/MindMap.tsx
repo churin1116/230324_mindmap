@@ -126,14 +126,14 @@ export default function OrgChartTree() {
 
   return (
     <>
-      <form>
+      <form onSubmit={onSubmit}>
         <div className='px-2 md:px-4 my-5'>
           <input type="text" className="form-control mb-4" name="question" placeholder="質問" value={question} onChange={(e) => setQuestion(e.target.value)} />
         </div>
         <div>
           {!isLoading ?
             <div className="flex justify-center mt-">
-              <button type="button" onClick={onSubmit} className="w-24 bg-main bg-main-hover text-white text-lg font-bold py-1 rounded transition">Generate</button>
+              <button type="submit" className="w-24 bg-main bg-main-hover text-white text-lg font-bold py-1 rounded transition">Generate</button>
             </div>
             :
             <div className="mt-"><div className="loader text-main"></div></div>
@@ -142,8 +142,7 @@ export default function OrgChartTree() {
       </form>
       
       {/* <div className='my-8'>{result}</div> */}
-      {isReady &&
-        <div
+      <div
           ref={treeContainer}
           className='w-full h-screen'
           onMouseDown={handleMouseDown}
@@ -164,7 +163,6 @@ export default function OrgChartTree() {
             // onLinkClick={handleNodeClick}
           />
         </div>
-      }
     </>
   );
 }
