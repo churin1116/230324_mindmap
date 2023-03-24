@@ -1,140 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Tree from 'react-d3-tree';
+import { Post, PostNode } from '../lib/post';
 
-// This is a simplified example of an org chart with a depth of 2.
-// Note how deeper levels are defined recursively via the `children` property.
-const data = {
-  name: 'CEO',
-  children: [
-    {
-      name: 'Manager',
-      attributes: {
-        department: 'Production',
-      },
-      children: [
-        {
-          name: 'Foreman',
-          attributes: {
-            department: 'Fabrication',
-          },
-          children: [
-            {
-              name: 'Worker',
-            },
-          ],
-        },
-        {
-          name: 'Foreman',
-          attributes: {
-            department: 'Assembly',
-          },
-          children: [
-            {
-              name: 'Worker',
-            },
-          ],
-        },
-      ],
-    },
-  ],
-};
 
-const data2 = {
-  name: "1. メインの枝1",
-  children: [
-    {
-      name: "1-1. サブの枝1",
-      children: [
-        { name: "1-1-1. サブの枝1" },
-        { name: "1-1-2. サブの枝1" },
-        { name: "1-1-3. サブの枝1" },
-      ],
-    },
-    {
-      name: "1-2. サブの枝1",
-      children: [
-        { name: "1-2-1. サブの枝1" },
-        { name: "1-2-2. サブの枝1" },
-      ],
-    },
-    {
-      name: "1-3. サブの枝1",
-      children: [{ name: "1-3-3. サブの枝1" }],
-    },
-    { name: "1-4. サブの枝1" },
-  ],
-};
-
-const data3 = {
-  name: "1. メインの枝1",
-  children: [
-    {
-      name: "1-1. サブの枝1",
-      children: [
-        { name: "1-1-1. サブの枝1" },
-        { name: "1-1-2. サブの枝1" },
-        { name: "1-1-3. サブの枝1" },
-      ],
-    },
-    {
-      name: "1-2. サブの枝1",
-      children: [
-        { name: "1-2-1. サブの枝1" },
-        { name: "1-2-2. サブの枝1" },
-      ],
-    },
-    {
-      name: "1-3. サブの枝1",
-      children: [{ name: "1-3-1. サブの枝1" }, { name: "1-3-2. サブの枝1" }],
-    },
-    { name: "1-4. サブの枝1" },
-    {
-      name: "1-5. サブの枝1",
-      children: [
-        {
-          name: "1-5-1. サブの枝1",
-          children: [
-            { name: "1-5-1-1. サブの枝1" },
-            { name: "1-5-1-2. サブの枝1" },
-            { name: "1-5-1-3. サブの枝1" },
-          ],
-        },
-        {
-          name: "1-5-2. サブの枝1",
-          children: [
-            { name: "1-5-2-1. サブの枝1" },
-            { name: "1-5-2-2. サブの枝1" },
-            {
-              name: "1-5-2-3. サブの枝1",
-              children: [
-                { name: "1-5-2-3-1. サブの枝1" },
-                { name: "1-5-2-3-2. サブの枝1" },
-              ],
-            },
-          ],
-        },
-        {
-          name: "1-5-3. サブの枝1",
-          children: [{ name: "1-5-3-1. サブの枝1" }],
-        },
-      ],
-    },
-    {
-      name: "1-6. サブの枝1",
-      children: [
-        {
-          name: "1-6-1. サブの枝1",
-          children: [
-            { name: "1-6-1-1. サブの枝1" },
-            { name: "1-6-1-2. サブの枝1" },
-            { name: "1-6-1-3. サブの枝1" },
-          ],
-        },
-        { name: "1-6-2. サブの枝1" },
-      ],
-    },
-  ],
-};
 
 const addChildToNode = (node, newNodeName) => {
   if (!node.children) {
@@ -147,11 +15,13 @@ const addChildToNode = (node, newNodeName) => {
   });
 };
 
+
+
 export default function OrgChartTree() {
   const [translate, setTranslate] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
   const [lastMousePosition, setLastMousePosition] = useState(null);
-  const [treeData, setTreeData] = useState(data2);
+  const [treeData, setTreeData] = useState([{ name: "Press the button above!" }]);
   const treeContainer = useRef(null);
 
   useEffect(() => {
@@ -163,7 +33,7 @@ export default function OrgChartTree() {
 
   const separation = {
     siblings: 1,
-    nonSiblings: 1.5,
+    nonSiblings: 1,
   };
 
   const handleMouseDown = (e) => {
@@ -199,28 +69,88 @@ export default function OrgChartTree() {
       setTreeData(updatedTreeData);
     }
   };
+  
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [result, setResult] = useState<string>('');
+  const [question, setQuestion] = useState<string>("チャット GPT の使い方、初心者向けに優しく解説する");
+
+  function parseJSON(obj) {
+    try {
+      console.log(obj)
+      // 「`」で囲まれた部分を取り出す
+      const replacedString = obj.replace(/`/g, "");
+
+      // 最初の「{」の前の文字列を削除する
+      const braceIndex = replacedString.indexOf("{");
+      const formattedString = replacedString.slice(braceIndex);
+
+      // 変換後のJSONを作成
+      const formattedJson = JSON.parse(formattedString);
+      console.log(obj)
+      console.log(formattedJson)
+      // obj = JSON.parse(obj);
+      return formattedJson;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async function onSubmit(e) {
+    e.preventDefault();
+    // if (!question || !identity1) return;
+    setIsLoading(true);
+    try {
+      const res = await PostNode("/api/generate", { text: question });
+
+      const newData = parseJSON(res.content);
+      console.log(newData)
+      setResult(String(res.content));
+      // console.log(String(res.content))
+      if (newData) setTreeData(newData);
+    } catch(error) {
+      console.error(error);
+      alert(error.message);
+    }
+    setIsLoading(false);
+  }
 
   return (
-    <div
-      ref={treeContainer}
-      className='w-full h-screen'
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-    >
-      <Tree
-        data={data3}
-        translate={translate}
-        separation={separation}
-        zoom={0.8}
-        initialDepth={2}
-        zoomable={true}
-        draggable={true}
-        // onNodeClick={handleNodeClick}
-        // onLinkClick={handleNodeClick}
-      />
-    </div>
+    <>
+      <div className='px-2 md:px-4 my-5'>
+        <input type="text" className="form-control mb-4" name="question" placeholder="質問" value={question} onChange={(e) => setQuestion(e.target.value)} />
+      </div>
+      <div>
+        {!isLoading ?
+          <div className="flex justify-center mt-">
+            <button type="button" onClick={onSubmit} className="w-24 bg-main bg-main-hover text-white text-lg font-bold py-1 rounded transition">Generate</button>
+          </div>
+          :
+          <div className="mt-"><div className="loader text-main"></div></div>
+        }
+      </div>
+      {/* <div className='my-8'>{result}</div> */}
+      <div
+        ref={treeContainer}
+        className='w-full h-screen'
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+      >
+        <Tree
+          data={treeData}
+          // data={data3}
+          translate={translate}
+          separation={separation}
+          zoom={0.8}
+          initialDepth={2}
+          zoomable={true}
+          draggable={true}
+          // onNodeClick={handleNodeClick}
+          // onLinkClick={handleNodeClick}
+        />
+      </div>
+    </>
   );
 }
 // zoom プロパティは、ツリーの表示倍率を制御し、initialDepth プロパティは、初期表示時に展開されるツリーの深さを制御します。
