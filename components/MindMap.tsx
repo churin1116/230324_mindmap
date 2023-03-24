@@ -77,7 +77,12 @@ export default function OrgChartTree() {
   function parseJSON(obj) {
     try {
       console.log(obj)
-      // 「`」で囲まれた部分を取り出す
+      // 最初と最後の文字が同じ「'」または「"」であれば削除する
+      const firstChar = obj.charAt(0);
+      const lastChar = obj.charAt(obj.length - 1);
+      if ((firstChar === "'" && lastChar === "'") || (firstChar === '"' && lastChar === '"')) {
+        obj = obj.slice(1, -1);
+      }
       const replacedString = obj.replace(/`/g, "");
 
       // 最初の「{」の前の文字列を削除する
@@ -91,6 +96,7 @@ export default function OrgChartTree() {
       // obj = JSON.parse(obj);
       return formattedJson;
     } catch (e) {
+      console.log('error : ',e)
       return null;
     }
   }
@@ -103,7 +109,7 @@ export default function OrgChartTree() {
       const res = await PostNode("/api/generate", { text: question });
 
       const newData = parseJSON(res.content);
-      console.log(newData)
+      console.log('newDAta : ',newData)
       setResult(String(res.content));
       // console.log(String(res.content))
       if (newData) setTreeData(newData);
