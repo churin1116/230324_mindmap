@@ -140,7 +140,6 @@ export default function OrgChartTree() {
           }
         </div>
       </form>
-      
       {/* <div className='my-8'>{result}</div> */}
       <div
           ref={treeContainer}
