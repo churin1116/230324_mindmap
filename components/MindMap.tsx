@@ -217,7 +217,7 @@ export default function OrgChartTree() {
         initialDepth={2}
         zoomable={true}
         draggable={true}
-        onNodeClick={handleNodeClick}
+        // onNodeClick={handleNodeClick}
         // onLinkClick={handleNodeClick}
       />
     </div>
