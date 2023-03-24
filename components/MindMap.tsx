@@ -71,6 +71,7 @@ export default function OrgChartTree() {
   };
   
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isReady, setIsReady] = useState<boolean>(false);
   const [result, setResult] = useState<string>('');
   const [question, setQuestion] = useState<string>("チャット GPT の使い方、初心者向けに優しく解説する");
 
@@ -112,7 +113,10 @@ export default function OrgChartTree() {
       console.log('newDAta : ',newData)
       setResult(String(res.content));
       // console.log(String(res.content))
-      if (newData) setTreeData(newData);
+      if (newData) {
+        setTreeData(newData);
+        setIsReady(true)
+      }
     } catch(error) {
       console.error(error);
       alert(error.message);
@@ -138,27 +142,29 @@ export default function OrgChartTree() {
       </form>
       
       {/* <div className='my-8'>{result}</div> */}
-      <div
-        ref={treeContainer}
-        className='w-full h-screen'
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-      >
-        <Tree
-          data={treeData}
-          // data={data3}
-          translate={translate}
-          separation={separation}
-          zoom={0.8}
-          initialDepth={2}
-          zoomable={true}
-          draggable={true}
-          // onNodeClick={handleNodeClick}
-          // onLinkClick={handleNodeClick}
-        />
-      </div>
+      {isReady &&
+        <div
+          ref={treeContainer}
+          className='w-full h-screen'
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+        >
+          <Tree
+            data={treeData}
+            // data={data3}
+            translate={translate}
+            separation={separation}
+            zoom={0.8}
+            initialDepth={2}
+            zoomable={true}
+            draggable={true}
+            // onNodeClick={handleNodeClick}
+            // onLinkClick={handleNodeClick}
+          />
+        </div>
+      }
     </>
   );
 }
