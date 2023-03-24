@@ -3,6 +3,14 @@ import { Configuration, OpenAIApi } from "openai";
 export default async function (req, res) {
   
   // console.log(req.body.conversations)
+  if (!process.env.OPENAI_API_KEY) {
+    res.status(500).json({
+      error: {
+        message: "OpenAI API key がセットされていません。",
+      }
+    });
+    return;
+  }
   const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
   });

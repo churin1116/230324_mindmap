@@ -116,18 +116,21 @@ export default function OrgChartTree() {
 
   return (
     <>
-      <div className='px-2 md:px-4 my-5'>
-        <input type="text" className="form-control mb-4" name="question" placeholder="質問" value={question} onChange={(e) => setQuestion(e.target.value)} />
-      </div>
-      <div>
-        {!isLoading ?
-          <div className="flex justify-center mt-">
-            <button type="button" onClick={onSubmit} className="w-24 bg-main bg-main-hover text-white text-lg font-bold py-1 rounded transition">Generate</button>
-          </div>
-          :
-          <div className="mt-"><div className="loader text-main"></div></div>
-        }
-      </div>
+      <form>
+        <div className='px-2 md:px-4 my-5'>
+          <input type="text" className="form-control mb-4" name="question" placeholder="質問" value={question} onChange={(e) => setQuestion(e.target.value)} />
+        </div>
+        <div>
+          {!isLoading ?
+            <div className="flex justify-center mt-">
+              <button type="button" onClick={onSubmit} className="w-24 bg-main bg-main-hover text-white text-lg font-bold py-1 rounded transition">Generate</button>
+            </div>
+            :
+            <div className="mt-"><div className="loader text-main"></div></div>
+          }
+        </div>
+      </form>
+      
       {/* <div className='my-8'>{result}</div> */}
       <div
         ref={treeContainer}
