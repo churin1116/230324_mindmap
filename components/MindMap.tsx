@@ -1,7 +1,66 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Tree from 'react-d3-tree';
-import { Post, PostNode } from '../lib/post';
+import { Configuration, OpenAIApi } from "openai";
 
+async function generateMindMap(text, apiKey) {
+  const configuration = new Configuration({
+    apiKey: apiKey,
+  });
+  const openai = new OpenAIApi(configuration);
+
+  if (!configuration.apiKey) {
+    throw new Error("OpenAI API key がセットされていません。");
+  }
+
+  try {
+    const completion = await openai.createChatCompletion({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: `中心のトピックは${text}
+
+        Please use the template below to create a mind map. Please output as a string that can be converted to json with JSON.parse. Replace the variable parts of the template with your own content, using square brackets [ ] to enclose them. # [Central Topic] - ## [Branch 1] - ### [Sub-branch 1.1] - #### [Sub-sub-branch 1.1.1] - [Leaf Node 1] - [Leaf Node 2] - [Leaf Node 3] - #### [Sub-sub-branch 1.1.2] - [Leaf Node 4] - [Leaf Node 5] - [Leaf Node 6] - ### [Sub-branch 1.2] - #### [Sub-sub-branch 1.2.1] - [Leaf Node 7] - [Leaf Node 8] - [Leaf Node 9] - #### [Sub-sub-branch 1.2.2] - [Leaf Node 10] - [Leaf Node 11] - [Leaf Node 12] - ## [Branch 2] - ### [Sub-branch 2.1] - #### [Sub-sub-branch 2.1.1] - [Leaf Node 13] - [Leaf Node 14] - [Leaf Node 15] - #### [Sub-sub-branch 2.1.2] - [Leaf Node 16] - [Leaf Node 17] - [Leaf Node 18] - ### [Sub-branch 2.2] - #### [Sub-sub-branch 2.2.1] - [Leaf Node 19] - [Leaf Node 20] - [Leaf Node 21] - #### [Sub-sub-branch 2.2.2] - [Leaf Node 22] - [Leaf Node 23] - [Leaf Node 24] loop infinitely アシスタント:トピックは何ですか？ lang:jp
+        
+        アウトプットスタイル:
+        {
+          "name": "1. メインの枝1",
+          "children": [
+            {
+              "name": "1-1. サブの枝1",
+              "children": [
+                { "name": "1-1-1. サブの枝1" },
+                { "name": "1-1-2. サブの枝1" },
+                { "name": "1-1-3. サブの枝1" },
+              ],
+            },
+            ...
+        }`,
+        },
+        {
+          role: "user",
+          content: `上記の型式で、「${text}」をテーマに出力してください。ただし、JSON.parseでjsonに変換できる文字列として出力して下さい。`,
+        },
+      ],
+      temperature: 1, // 値が高いほど、モデルがより多くのリスクを負う
+    });
+    return completion.data.choices[0].message;
+  } catch (error) {
+    if (error.response) {
+      console.error(
+        `【error ${error.response.status}】 ${error.response.data.error.message}`
+      );
+      return error.response.data;
+    } else {
+      console.error(`Error with OpenAI API request: ${error.message}`);
+      return {
+        error: {
+          message: "An error occurred during your request.",
+        },
+      };
+    }
+  }
+}
 
 
 const addChildToNode = (node, newNodeName) => {
@@ -23,6 +82,7 @@ export default function OrgChartTree() {
   const [lastMousePosition, setLastMousePosition] = useState(null);
   const [treeData, setTreeData] = useState([{ name: "Press the button above!" }]);
   const treeContainer = useRef(null);
+  const [apiKey, setApiKey] = useState("");
 
   useEffect(() => {
     if (treeContainer.current) {
@@ -58,17 +118,6 @@ export default function OrgChartTree() {
       setLastMousePosition({ x: e.clientX, y: e.clientY });
     }
   };
-
-  const handleNodeClick = (node) => {
-    const newNodeName = prompt("Enter the name for the new child node:");
-    if (newNodeName) {
-      const updatedTreeData = JSON.parse(JSON.stringify(treeData));
-      console.log(updatedTreeData);
-      console.log(node);
-      addChildToNode(node, newNodeName);
-      setTreeData(updatedTreeData);
-    }
-  };
   
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isReady, setIsReady] = useState<boolean>(false);
@@ -101,13 +150,17 @@ export default function OrgChartTree() {
       return null;
     }
   }
-
   async function onSubmit(e) {
     e.preventDefault();
-    // if (!question || !identity1) return;
+
+    if (!apiKey) {
+      alert("APIキーが入力されていません。");
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const res = await PostNode("/api/generate", { text: question });
+      const res = await generateMindMap(question, apiKey);
 
       const newData = parseJSON(res.content);
       console.log('newDAta : ',newData)
@@ -128,7 +181,22 @@ export default function OrgChartTree() {
     <>
       <form onSubmit={onSubmit}>
         <div className='px-2 md:px-4 my-5'>
-          <input type="text" className="form-control mb-4" name="question" placeholder="質問" value={question} onChange={(e) => setQuestion(e.target.value)} />
+        <input
+            type="password"
+            className="form-control mb-4"
+            name="apikey"
+            placeholder="APIキー"
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+          />
+        <input
+            type="text"
+            className="form-control mb-4"
+            name="question"
+            placeholder="質問"
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+          />
         </div>
         <div>
           {!isLoading ?
